@@ -1,52 +1,34 @@
+// app.ts
 import express from 'express';
 import passport from 'passport';
-import { Strategy as LocalStrategy } from 'passport-local';
+import { Strategy as BearerStrategy } from 'passport-http-bearer';
+import { users } from './db';  // Asumimos que db exporta correctamente los usuarios
+import morgan from 'morgan';
+import { User } from './db/users';
 
-passport.use(new LocalStrategy(
-  (username, password, done) => {
-    console.log(`Intento de inicio de sesión con usuario: ${username}`);
-    if (username === 'admin' && password === 'admin') {
-      console.log('Inicio de sesión exitoso');
-      done(null, { id: 1, name: 'Admin' });
-    } else {
-      console.log('Inicio de sesión fallido');
-      done(null, false);
-    }
-  }
-));
-
-passport.serializeUser((user: any, done) => {
-  console.log('Serializando usuario:', user);
-  done(null, user);
-});
-
-passport.deserializeUser((user: any, done) => {
-  console.log('Deserializando usuario:', user);
-  done(null, user);
-});
+passport.use(new BearerStrategy(
+  (token: string, cb: (error: any, user?: any) => void) => {
+    users.findByToken(token, (err, user) => {
+      if (err) { return cb(err); }
+      if (!user) { return cb(null, false); }
+      return cb(null, user);
+    });
+  })
+);
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(passport.initialize());
+app.use(morgan('combined'));
 
-app.post('/login', (req, res, next) => {
-  console.log('Solicitud de login recibida', req.body);
-  passport.authenticate('local', (err: any, user: any, info: any) => {
-    if (err) {
-      console.log('Error en la autenticación:', err);
-      return next(err);
+app.get('/',
+  passport.authenticate('bearer', { session: false }),
+  (req: express.Request, res: express.Response) => {
+    if (req.user) {
+        const user = req.user as User;
+        res.json({ username: user.username, email: user.emails[0].value });
     }
-    if (!user) {
-      console.log('Login fallido:', info);
-      return res.status(400).send('Login fallido');
-    }
-    console.log('Usuario autenticado:', user);
-    res.send('Autenticado con éxito');
-  })(req, res, next);
-});
+  }
+);
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
+app.listen(3000, () => {
+    console.log('Server running on port 3000');
 });
