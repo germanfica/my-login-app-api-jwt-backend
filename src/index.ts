@@ -10,12 +10,11 @@ import { User } from './db/users';
 // Configuración de la estrategia Local para Passport
 passport.use(new LocalStrategy(
   (username, password, done) => {
-    users.findByUsername(username, (err, user) => {
+    users.findByUsername(username, async (err, user) => {
       if (err) { return done(err); }
-      if (!user) { return done(null, false); }
-      if (!users.verifyPassword(user, password)) {  // Asume una función para verificar la contraseña
-        return done(null, false);
-      }
+      if (!user) { return done(null, false, { message: 'Incorrect username.' }); }
+      const passwordMatch = await users.verifyPassword(user, password);
+      if (!passwordMatch) { return done(null, false, { message: 'Incorrect password.' }); }
       return done(null, user);
     });
   }
@@ -61,5 +60,5 @@ app.get('/profile',
 );
 
 app.listen(3000, () => {
-    console.log('Server running on port 3000');
+  console.log('Server running on port 3000');
 });

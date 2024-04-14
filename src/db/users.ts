@@ -1,28 +1,33 @@
-import { randomBytes } from "crypto";
+import bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 
 export interface User {
     id: number;
     username: string;
-    password: string;  // Suponiendo que tenemos una contraseña para verificar
+    password: string;
     token: string;
     displayName: string;
     emails: { value: string }[];
 }
 
 const records: User[] = [
-    { id: 1, username: 'jack', password: 'jackspassword', token: '123456789', displayName: 'Jack', emails: [{ value: 'jack@example.com' }] },
-    { id: 2, username: 'jill', password: 'jillspassword', token: 'abcdefghi', displayName: 'Jill', emails: [{ value: 'jill@example.com' }] }
+    // Las contraseñas deben ser hasheadas al crear los usuarios en la realidad
+    { id: 1, username: 'jack', password: '$2b$10$85DZBfUxdOa00ZOa73X.HOdIXAoSKvhhCqiUETml1HXDRMJJbm93G', token: '123456789', displayName: 'Jack', emails: [{ value: 'jack@example.com' }] },
+    { id: 2, username: 'jill', password: '$2b$10$...', token: 'abcdefghi', displayName: 'Jill', emails: [{ value: 'jill@example.com' }] }
 ];
+
+// should be private only not public
+export const hashPassword = async (password: string): Promise<string> => {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    console.log(`Hashed Password: ${hashedPassword}`); // Imprime el hash en consola
+    return hashedPassword;
+};
 
 export const findByToken = (token: string, cb: (err: Error | null, record?: User | null) => void): void => {
     process.nextTick(() => {
-        for (let i = 0, len = records.length; i < len; i++) {
-            const record = records[i];
-            if (record.token === token) {
-                return cb(null, record);
-            }
-        }
-        return cb(null, null);
+        const user = records.find(record => record.token === token);
+        return cb(null, user || null);
     });
 };
 
@@ -33,9 +38,16 @@ export const findByUsername = (username: string, cb: (err: Error | null, user?: 
     });
 };
 
-export const verifyPassword = (user: User, password: string): boolean => {
-    // En un entorno de producción, usa un método seguro de verificación de contraseñas
-    return user.password === password;
+export const verifyPassword = async (user: User, password: string): Promise<boolean> => {
+    console.log(`USERNAME: ${user.username}; PASSWORD ${password}`);
+    console.log(`USER PASSWORD FROM RECORDS: ${user.password}`);
+    const match = await bcrypt.compare(password, user.password);
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    console.log(`HASHED PASSWORD: ${hashedPassword}`);
+    console.log(`VERIFICACION ${match}`);
+
+    return bcrypt.compare(password, user.password);
 };
 
 export const generateToken = (user: User): string => {
