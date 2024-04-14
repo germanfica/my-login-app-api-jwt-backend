@@ -64,3 +64,33 @@ export const generateToken = (user: User): string => {
 
     return newToken;
 };
+
+// Función para crear un usuario
+export async function createUser(username: string, password: string, displayName: string, email: string): Promise<User> {
+    // Comprobar si el nombre de usuario ya existe
+    const existingUser = records.find(user => user.username === username);
+    if (existingUser) {
+        throw new Error('Username already exists.');
+    }
+
+    // Hash de la contraseña
+    const hashedPassword = await hashPassword(password);
+
+    // Generación de un nuevo token
+    const token = randomBytes(16).toString('hex');
+
+    // Crear el usuario
+    const newUser: User = {
+        id: records.length + 1,  // Asumimos un ID simple basado en la longitud del arreglo
+        username,
+        password: hashedPassword,
+        token,
+        displayName,
+        emails: [{ value: email }]
+    };
+
+    // Agregar el usuario al "almacén" de registros
+    records.push(newUser);
+
+    return newUser;
+}

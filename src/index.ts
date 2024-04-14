@@ -59,6 +59,22 @@ app.get('/profile',
   }
 );
 
+app.post('/signup', async (req, res) => {
+  try {
+    const { username, password, displayName, email } = req.body;
+    const newUser = await users.createUser(username, password, displayName, email);
+    res.status(201).json({
+      id: newUser.id,
+      username: newUser.username,
+      displayName: newUser.displayName,
+      email: newUser.emails[0].value,
+      token: newUser.token
+    });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 app.listen(3000, () => {
   console.log('Server running on port 3000');
 });
