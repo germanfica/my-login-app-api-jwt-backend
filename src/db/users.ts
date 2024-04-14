@@ -12,6 +12,7 @@ export interface User {
 
 const records: User[] = [
     // Las contraseñas deben ser hasheadas al crear los usuarios en la realidad
+    // el password de jack es jackspassword
     { id: 1, username: 'jack', password: '$2b$10$85DZBfUxdOa00ZOa73X.HOdIXAoSKvhhCqiUETml1HXDRMJJbm93G', token: '123456789', displayName: 'Jack', emails: [{ value: 'jack@example.com' }] },
     { id: 2, username: 'jill', password: '$2b$10$...', token: 'abcdefghi', displayName: 'Jill', emails: [{ value: 'jill@example.com' }] }
 ];
