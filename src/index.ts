@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import { initializePassport, authenticateLocal, authenticateJwt } from './auth';
-import { users } from './db';  // Asegúrate de que 'db' exporta correctamente los usuarios
+import { initializeDatabase, createUser, findByUsername, verifyPassword } from './db/users';
 import { User } from './db/users';
 
 const app = express();
@@ -24,6 +24,11 @@ app.use(cors({
 // Inicializar Passport
 app.use(initializePassport());
 
+// Inicializar base de datos
+initializeDatabase().then(() => {
+  console.log('Database initialized');
+});
+
 // Rutas
 app.post('/login', authenticateLocal, (req, res) => {
   const user = req.user as User;
@@ -39,7 +44,7 @@ app.get('/profile', authenticateJwt, (req, res) => {
 app.post('/signup', async (req, res) => {
   try {
     const { username, password, displayName, email } = req.body;
-    const newUser = await users.createUser(username, password, displayName, email);
+    const newUser = await createUser(username, password, displayName, email);
     res.status(201).json({
       id: newUser.id,
       username: newUser.username,

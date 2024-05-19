@@ -1,5 +1,7 @@
 // db/users.ts
 import bcrypt from 'bcrypt';
+import { DataTypes, Model } from 'sequelize';
+import sequelize from './database';
 
 export interface User {
   id: number;
@@ -9,12 +11,36 @@ export interface User {
   emails: { value: string }[];
 }
 
-const records: User[] = [
-  { id: 1, username: 'jack', password: '$2b$10$85DZBfUxdOa00ZOa73X.HOdIXAoSKvhhCqiUETml1HXDRMJJbm93G', displayName: 'Jack', emails: [{ value: 'jack@example.com' }] },
-  { id: 2, username: 'jill', password: '$2b$10$...', displayName: 'Jill', emails: [{ value: 'jill@example.com' }] }
-];
+class UserModel extends Model { }
 
-// should be private only not public
+UserModel.init({
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  displayName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  emails: {
+    type: DataTypes.JSON,
+    allowNull: false,
+  },
+}, {
+  sequelize,
+  modelName: 'User',
+});
+
 export const hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -22,11 +48,9 @@ export const hashPassword = async (password: string): Promise<string> => {
   return hashedPassword;
 };
 
-export const findByUsername = (username: string, cb: (err: Error | null, user?: User | null) => void): void => {
-  process.nextTick(() => {
-    const user = records.find(record => record.username === username);
-    return cb(null, user || null);
-  });
+export const findByUsername = async (username: string): Promise<User | null> => {
+  const user = await UserModel.findOne({ where: { username } });
+  return user ? user.get() as User : null;
 };
 
 export const verifyPassword = async (user: User, password: string): Promise<boolean> => {
@@ -41,10 +65,9 @@ export const verifyPassword = async (user: User, password: string): Promise<bool
   return match;
 };
 
-// Función para crear un usuario
 export async function createUser(username: string, password: string, displayName: string, email: string): Promise<User> {
   // Comprobar si el nombre de usuario ya existe
-  const existingUser = records.find(user => user.username === username);
+  const existingUser = await findByUsername(username);
   if (existingUser) {
     throw new Error('Username already exists.');
   }
@@ -53,16 +76,16 @@ export async function createUser(username: string, password: string, displayName
   const hashedPassword = await hashPassword(password);
 
   // Crear el usuario
-  const newUser: User = {
-    id: records.length + 1,  // Asumimos un ID simple basado en la longitud del arreglo
+  const newUser = await UserModel.create({
     username,
     password: hashedPassword,
     displayName,
     emails: [{ value: email }]
-  };
+  });
 
-  // Agregar el usuario al "almacén" de registros
-  records.push(newUser);
+  return newUser.get() as User;
+}
 
-  return newUser;
+export async function initializeDatabase() {
+  await sequelize.sync({ force: true }); // Usar { force: true } solo en desarrollo; elimina tablas existentes
 }
