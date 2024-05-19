@@ -4,6 +4,7 @@ import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as BearerStrategy } from 'passport-http-bearer';
 import morgan from 'morgan';
+import cors from 'cors';
 import { users } from './db';  // Asumimos que db exporta correctamente los usuarios
 import { User } from './db/users';
 
@@ -38,6 +39,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined'));
 
+// Habilitar CORS
+app.use(cors());  // Esto permitirá solicitudes desde cualquier origen. Puedes personalizarlo según tus necesidades.
+
 // Inicializar Passport
 app.use(passport.initialize());
 
@@ -45,7 +49,6 @@ app.use(passport.initialize());
 app.post('/login',
   passport.authenticate('local', { session: false }),
   (req, res) => {
-    // Suponiendo que tienes una función para generar un token al usuario
     const token = users.generateToken(req.user as User);
     res.json({ token });
   }
