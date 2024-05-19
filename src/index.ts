@@ -8,6 +8,24 @@ import cors from 'cors';
 import { users } from './db';  // Asumimos que db exporta correctamente los usuarios
 import { User } from './db/users';
 
+// cors with whitelist
+// var whitelist = ['http://localhost:4200']
+// var corsOptions = {
+//   origin: function (origin: any, callback: any) {
+//     if (whitelist.indexOf(origin) !== -1) {
+//       callback(null, true)
+//     } else {
+//       callback(new Error('Not allowed by CORS'))
+//     }
+//   }
+// }
+
+// simple cors
+var corsOptions = {
+  origin: 'http://localhost:4200',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+
 // Configuración de la estrategia Local para Passport
 passport.use(new LocalStrategy(
   (username, password, done) => {
@@ -40,7 +58,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined'));
 
 // Habilitar CORS
-app.use(cors());  // Esto permitirá solicitudes desde cualquier origen. Puedes personalizarlo según tus necesidades.
+app.use(cors(corsOptions));  // Esto permitirá solicitudes desde cualquier origen. Puedes personalizarlo según tus necesidades.
 
 // Inicializar Passport
 app.use(passport.initialize());
