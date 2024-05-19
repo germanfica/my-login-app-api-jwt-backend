@@ -48,7 +48,7 @@ export const verifyPassword = async (user: User, password: string): Promise<bool
     console.log(`HASHED PASSWORD: ${hashedPassword}`);
     console.log(`VERIFICACION ${match}`);
 
-    return bcrypt.compare(password, user.password);
+    return match;
 };
 
 export const generateToken = (user: User): string => {
