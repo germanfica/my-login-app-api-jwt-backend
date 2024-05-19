@@ -7,6 +7,9 @@ import { initializePassport, authenticateLocal, authenticateJwt } from './auth';
 import { initializeDatabase, createUser, findByUsername, verifyPassword } from './db/users';
 import { User } from './db/users';
 
+import { validationResult } from 'express-validator';
+import { validateUserLogin, validateUserSignUp } from './db/validators';
+
 const app = express();
 const jwtSecret = 'your_jwt_secret'; // Asegúrate de mantener tu secreto seguro y privado
 
@@ -31,8 +34,17 @@ initializeDatabase().then(() => {
   console.error('Database initialization failed:', error);
 });
 
+// Middleware de manejo de errores de validación
+const handleValidationErrors = (req: any, res: any, next: any) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+};
+
 // Rutas
-app.post('/login', authenticateLocal, (req, res) => {
+app.post('/login', validateUserLogin, handleValidationErrors, authenticateLocal, (req: any, res: any) => {
   const user = req.user as User;
   const token = jwt.sign({ username: user.username }, jwtSecret);
   res.json({ token });
@@ -43,7 +55,7 @@ app.get('/profile', authenticateJwt, (req, res) => {
   res.json({ username: user.username, email: user.emails[0].value });
 });
 
-app.post('/signup', async (req, res) => {
+app.post('/signup', validateUserSignUp, handleValidationErrors, async (req: any, res: any) => {
   try {
     const { username, password, displayName, email } = req.body;
     const newUser = await createUser(username, password, displayName, email);

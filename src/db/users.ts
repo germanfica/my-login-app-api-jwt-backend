@@ -23,18 +23,37 @@ UserModel.init({
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
+    validate: {
+      notEmpty: true,
+      isAlphanumeric: true,
+    }
   },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [6, 100],
+    }
   },
   displayName: {
     type: DataTypes.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+    }
   },
   emails: {
     type: DataTypes.JSON,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+      isEmailArray(value: any) {
+        if (!Array.isArray(value) || value.some(email => !/\S+@\S+\.\S+/.test(email.value))) {
+          throw new Error('Emails should be an array of valid email addresses');
+        }
+      }
+    }
   },
 }, {
   sequelize,
