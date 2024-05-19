@@ -33,12 +33,14 @@
     "mysql2": "^3.9.3",
     "passport": "^0.7.0",
     "passport-http-bearer": "^1.0.1",
+    "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "sequelize": "^6.37.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.4"
   },
   "devDependencies": {
-    "@types/node": "^20.12.5"
+    "@types/node": "^20.12.5",
+    "@types/passport-jwt": "^4.0.1"
   }
 }
