@@ -27,6 +27,8 @@ app.use(initializePassport());
 // Inicializar base de datos
 initializeDatabase().then(() => {
   console.log('Database initialized');
+}).catch(error => {
+  console.error('Database initialization failed:', error);
 });
 
 // Rutas

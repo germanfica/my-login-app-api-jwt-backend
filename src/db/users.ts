@@ -87,5 +87,7 @@ export async function createUser(username: string, password: string, displayName
 }
 
 export async function initializeDatabase() {
-  await sequelize.sync({ force: true }); // Usar { force: true } solo en desarrollo; elimina tablas existentes
+  // await sequelize.sync({ force: true }); // Usar { force: true } solo en desarrollo; elimina tablas existentes
+  // await sequelize.sync({ alter: true }); // Usar { alter: true } para actualizar la estructura sin eliminar datos
+  await sequelize.sync(); // Sincroniza la base de datos con los modelos definidos. Esto crea las tablas si no existen, pero no realiza cambios estructurales. Es adecuado para entornos de desarrollo y pruebas donde la estructura de la base de datos no cambia frecuentemente.
 }
