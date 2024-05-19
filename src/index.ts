@@ -96,6 +96,21 @@ app.post('/signup', async (req, res) => {
   }
 });
 
+app.post('/logout',
+  passport.authenticate('bearer', { session: false }),
+  (req, res) => {
+    const user = req.user as User;
+    res.status(200).send({ message: 'Logout successful' });
+
+    const success = users.invalidateToken(user.token);
+    if (success) {
+      res.status(200).send({ message: 'Logout successful' });
+    } else {
+      res.status(400).send({ message: 'Logout failed' });
+    }
+  }
+);
+
 app.listen(3000, () => {
   console.log('Server running on port 3000');
 });

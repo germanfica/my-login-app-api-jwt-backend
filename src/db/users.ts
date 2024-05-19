@@ -94,3 +94,12 @@ export async function createUser(username: string, password: string, displayName
 
     return newUser;
 }
+
+export const invalidateToken = (token: string): boolean => {
+    const userIndex = records.findIndex(record => record.token === token);
+    if (userIndex !== -1) {
+        records[userIndex].token = ''; // Invalida el token
+        return true;
+    }
+    return false;
+};
