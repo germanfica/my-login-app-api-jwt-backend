@@ -12,6 +12,7 @@ app.germanfica.csr
 app.germanfica.key
 localhost.crt
 localhost.key
+.env
 
 # Utils
 CombineStagedGitDiffToOutput.ps1

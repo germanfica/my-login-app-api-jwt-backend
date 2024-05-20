@@ -4,14 +4,16 @@ import morgan from 'morgan';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import { initializePassport, authenticateLocal, authenticateJwt } from './auth';
-import { initializeDatabase, createUser, findByUsername, verifyPassword } from './db/users';
+import { initializeDatabase, createUser } from './db/users';
 import { User } from './db/users';
 
 import { validationResult } from 'express-validator';
 import { validateUserLogin, validateUserSignUp } from './db/validators';
+import config from './config';
+
 
 const app = express();
-const jwtSecret = 'your_jwt_secret'; // Asegúrate de mantener tu secreto seguro y privado
+const jwtSecret = config.jwtSecret; // Asegúrate de mantener tu secreto seguro y privado
 
 // Middleware para parsear el cuerpo de las peticiones
 app.use(express.json());

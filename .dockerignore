@@ -1,0 +1,9 @@
+# Ignore .env
+.env
+
+# Others
+node_modules
+dist
+build
+.git
+.DS_Store
