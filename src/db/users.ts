@@ -63,7 +63,7 @@ UserModel.init({
 export const hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
-  console.log(`Hashed Password: ${hashedPassword}`); // Imprime el hash en consola
+  //console.log(`Hashed Password: ${hashedPassword}`); // Imprime el hash en consola
   return hashedPassword;
 };
 
@@ -73,13 +73,13 @@ export const findByUsername = async (username: string): Promise<User | null> => 
 };
 
 export const verifyPassword = async (user: User, password: string): Promise<boolean> => {
-  console.log(`USERNAME: ${user.username}; PASSWORD ${password}`);
-  console.log(`USER PASSWORD FROM RECORDS: ${user.password}`);
+  //console.log(`USERNAME: ${user.username}; PASSWORD ${password}`);
+  //console.log(`USER PASSWORD FROM RECORDS: ${user.password}`);
   const match = await bcrypt.compare(password, user.password);
-  const hashedPassword = await bcrypt.hash(password, 10);
+  //const hashedPassword = await bcrypt.hash(password, 10);
 
-  console.log(`HASHED PASSWORD: ${hashedPassword}`);
-  console.log(`VERIFICACION ${match}`);
+  //console.log(`HASHED PASSWORD: ${hashedPassword}`);
+  //console.log(`VERIFICACION ${match}`);
 
   return match;
 };
