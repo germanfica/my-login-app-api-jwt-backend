@@ -106,6 +106,6 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/**/*", "src/utils/validators.ts"],                               /* Incluye todos los archivos TypeScript en el directorio src y subdirectorios */
+  "include": ["src/**/*"],                               /* Incluye todos los archivos TypeScript en el directorio src y subdirectorios */
   "exclude": ["node_modules", "**/*.spec.ts"]            /* Excluye el directorio node_modules y los archivos de prueba */
 }
