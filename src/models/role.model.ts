@@ -28,6 +28,7 @@ RoleModel.init({
 }, {
   sequelize,
   modelName: 'Role',
+  tableName: 'role'
 });
 
 export default RoleModel;
