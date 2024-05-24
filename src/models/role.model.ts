@@ -1,4 +1,4 @@
-// models/Role.ts
+// models/role.model.ts
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 

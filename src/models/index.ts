@@ -1,3 +1,4 @@
+// models/index.ts
 import sequelize from "../config/database";
 import RoleModel from "./role.model";
 import UserModel from "./user.model";
