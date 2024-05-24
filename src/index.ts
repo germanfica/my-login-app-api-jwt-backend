@@ -4,12 +4,14 @@ import morgan from 'morgan';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import { initializePassport, authenticateLocal, authenticateJwt } from './auth';
-import { initializeDatabase, createUser } from './db/users';
-import { User } from './db/users';
+import { User } from './models/user.model';
 
 import { validationResult } from 'express-validator';
-import { validateUserLogin, validateUserSignUp } from './db/validators';
 import config from './config';
+//import { initializeDatabase } from './models';
+import db from './models';
+import { validateUserLogin, validateUserSignUp } from './utils/validators';
+import { createUser } from './services/user.service';
 
 
 const app = express();
@@ -30,7 +32,7 @@ app.use(cors({
 app.use(initializePassport());
 
 // Inicializar base de datos
-initializeDatabase().then(() => {
+db.initializeDatabase().then(() => {
   console.log('Database initialized');
 }).catch(error => {
   console.error('Database initialization failed:', error);

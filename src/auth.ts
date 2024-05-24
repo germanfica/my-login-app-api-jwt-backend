@@ -2,8 +2,8 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import { findByUsername, verifyPassword } from './db/users';
 import config from './config';
+import { findByUsername, verifyPassword } from './services/user.service';
 
 const jwtSecret = config.jwtSecret; // Asegúrate de mantener tu secreto seguro y privado
 
