@@ -3,18 +3,16 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 
 export enum ERole {
-    ROLE_USER = 'ROLE_USER',
-    ROLE_STUDENT = 'ROLE_STUDENT',
-    ROLE_TEACHER = 'ROLE_TEACHER',
-    ROLE_ADMIN = 'ROLE_ADMIN',
-  }
+  ROLE_USER = 'ROLE_USER',
+  ROLE_ADMIN = 'ROLE_ADMIN',
+}
 
 export interface Role {
   id: number;
   name: ERole;
 }
 
-class RoleModel extends Model {}
+class RoleModel extends Model { }
 
 RoleModel.init({
   id: {
