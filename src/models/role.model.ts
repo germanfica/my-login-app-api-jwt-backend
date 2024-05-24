@@ -28,7 +28,8 @@ RoleModel.init({
 }, {
   sequelize,
   modelName: 'Role',
-  tableName: 'role'
+  tableName: 'role',
+  timestamps: false // Disable createdAt and updatedAt fields
 });
 
 export default RoleModel;

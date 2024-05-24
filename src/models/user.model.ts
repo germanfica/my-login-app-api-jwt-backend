@@ -58,7 +58,8 @@ UserModel.init({
 }, {
   sequelize,
   modelName: 'User',
-  tableName: 'user'
+  tableName: 'user',
+  timestamps: false // Disable createdAt and updatedAt fields
 });
 
 // Define associations
