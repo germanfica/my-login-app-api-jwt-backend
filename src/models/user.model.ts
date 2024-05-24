@@ -1,5 +1,4 @@
-// users.ts
-import bcrypt from 'bcrypt';
+// models/user.model.ts
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 import RoleModel from './role.model';
@@ -65,9 +64,14 @@ UserModel.init({
 UserModel.belongsToMany(RoleModel, { through: 'UserRoles', foreignKey: 'userId' });
 RoleModel.belongsToMany(UserModel, { through: 'UserRoles', foreignKey: 'roleId' });
 
+// NOTE: Avoid placing business logic directly in the model.
+// Business logic, such as password hashing, should be handled in the service.
+// Keep the model focused on data structure and relationships.
+// For more details, refer to user.service.ts.
+
 // Hash the password before saving the user
-UserModel.beforeCreate(async (user: any) => {
-  user.password = await bcrypt.hash(user.password, 10);
-});
+// UserModel.beforeCreate(async (user: any) => {
+//   user.password = await hashPassword(user.password);
+// });
 
 export default UserModel;
