@@ -56,7 +56,7 @@ app.post('/login', validateUserLogin, handleValidationErrors, authenticateLocal,
 
 app.get('/profile', authenticateJwt, (req, res) => {
   const user = req.user as User;
-  res.json({ username: user.username, email: user.emails[0].value });
+  res.json({ username: user.username, email: user.email });
 });
 
 app.post('/signup', validateUserSignUp, handleValidationErrors, async (req: any, res: any) => {
@@ -67,7 +67,7 @@ app.post('/signup', validateUserSignUp, handleValidationErrors, async (req: any,
       id: newUser.id,
       username: newUser.username,
       displayName: newUser.displayName,
-      email: newUser.emails[0].value,
+      email: newUser.email,
       token: jwt.sign({ username: newUser.username }, jwtSecret)
     });
   } catch (error: any) {
