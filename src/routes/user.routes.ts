@@ -1,12 +1,9 @@
 import { Router } from 'express';
 import { authenticateJwt } from '../auth';
-import { User } from '../dtos/user.dto';
+import * as UserController from '../controllers/user.controller';
 
 const router = Router();
 
-router.get('/profile', authenticateJwt, (req, res) => {
-    const user = req.user as User;
-    res.json({ username: user.username, email: user.email });
-});
+router.get('/profile', authenticateJwt, UserController.getUserProfile);
 
 export default router;
