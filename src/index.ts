@@ -4,15 +4,13 @@ import morgan from 'morgan';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import { initializePassport, authenticateLocal, authenticateJwt } from './auth';
-import { User } from './models/user.model';
-
+import { User } from './dtos/user.dto';
 import { validationResult } from 'express-validator';
 import config from './config';
 //import { initializeDatabase } from './models';
 import db from './models';
 import { validateUserLogin, validateUserSignUp } from './utils/validators';
 import { createUser } from './services/user.service';
-
 
 const app = express();
 const jwtSecret = config.jwtSecret; // Asegúrate de mantener tu secreto seguro y privado

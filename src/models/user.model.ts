@@ -3,14 +3,6 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 import RoleModel from './role.model';
 
-export interface User {
-  id: number;
-  email: string;
-  username: string;
-  password: string;
-  displayName: string;
-}
-
 class UserModel extends Model { }
 
 UserModel.init({

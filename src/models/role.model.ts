@@ -1,16 +1,7 @@
 // models/role.model.ts
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
-
-export enum ERole {
-  ROLE_USER = 'ROLE_USER',
-  ROLE_ADMIN = 'ROLE_ADMIN',
-}
-
-export interface Role {
-  id: number;
-  name: ERole;
-}
+import { ERole } from '../enums/role.enum';
 
 class RoleModel extends Model { }
 

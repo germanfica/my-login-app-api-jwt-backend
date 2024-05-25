@@ -1,6 +1,7 @@
 // user.service.ts
 import bcrypt from 'bcrypt';
-import UserModel, { User } from '../models/user.model';
+import UserModel from '../models/user.model';
+import { User } from '../dtos/user.dto';
 
 // Define a type that includes only the attributes needed to create a new user
 //type UserCreationAttributes = Pick<User, 'username' | 'email' | 'password' | 'displayName'>;
