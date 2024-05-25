@@ -26,6 +26,14 @@ UserModel.init({
       }
     },
   },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [6, 100],
+    }
+  },
   username: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -33,14 +41,6 @@ UserModel.init({
     validate: {
       notEmpty: true,
       isAlphanumeric: true,
-    }
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    validate: {
-      notEmpty: true,
-      len: [6, 100],
     }
   },
   displayName: {
