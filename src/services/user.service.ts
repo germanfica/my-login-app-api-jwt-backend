@@ -2,6 +2,10 @@
 import bcrypt from 'bcrypt';
 import UserModel, { User } from '../models/user.model';
 
+// Define a type that includes only the attributes needed to create a new user
+//type UserCreationAttributes = Pick<User, 'username' | 'email' | 'password' | 'displayName'>;
+type UserCreationAttributes = Omit<User, 'id'>;
+
 export const hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -26,12 +30,14 @@ export const createUser = async (username: string, password: string, displayName
 
   const hashedPassword = await hashPassword(password);
 
-  const newUser = await UserModel.create({
+  const userData: UserCreationAttributes = {
     username,
-    email: email,
+    email,
     password: hashedPassword,
     displayName,
-  });
+  };
+
+  const newUser = await UserModel.create(userData);
 
   return newUser.get() as User;
 };
