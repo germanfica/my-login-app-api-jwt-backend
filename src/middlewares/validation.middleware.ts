@@ -1,4 +1,4 @@
-// utils/validators.ts
+// middlewares/validation.middleware.ts
 import { body } from 'express-validator';
 
 export const validateUserSignUp = [

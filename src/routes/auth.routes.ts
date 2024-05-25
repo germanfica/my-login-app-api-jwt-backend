@@ -1,9 +1,9 @@
 // routes/auth.routes.ts
 import { Router } from 'express';
 import { authenticateLocal, authenticateJwt } from '../auth';
-import { validateUserLogin, validateUserSignUp } from '../utils/validators';
 import * as AuthController from '../controllers/auth.controller';
 import { handleValidationErrors } from '../middlewares/error.middleware';
+import { validateUserLogin, validateUserSignUp } from '../middlewares/validation.middleware';
 
 const router = Router();
 
