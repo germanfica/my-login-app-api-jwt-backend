@@ -1,3 +1,4 @@
+// routes/auth.routes.ts
 import { Router } from 'express';
 import { authenticateLocal, authenticateJwt } from '../auth';
 import { validateUserLogin, validateUserSignUp } from '../utils/validators';

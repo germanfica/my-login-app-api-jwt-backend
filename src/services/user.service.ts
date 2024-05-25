@@ -1,4 +1,4 @@
-// user.service.ts
+// services/user.service.ts
 import bcrypt from 'bcrypt';
 import UserModel from '../models/user.model';
 import { User } from '../dtos/user.dto';

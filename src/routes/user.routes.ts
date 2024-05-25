@@ -1,3 +1,4 @@
+// routes/user.routes.ts
 import { Router } from 'express';
 import { authenticateJwt } from '../auth';
 import * as UserController from '../controllers/user.controller';
