@@ -24,11 +24,6 @@ router.post('/login', validateUserLogin, handleValidationErrors, authenticateLoc
     res.json({ token });
 });
 
-router.get('/profile', authenticateJwt, (req, res) => {
-    const user = req.user as User;
-    res.json({ username: user.username, email: user.email });
-});
-
 router.post('/signup', validateUserSignUp, handleValidationErrors, async (req: any, res: any) => {
     try {
         const { username, password, displayName, email } = req.body;
