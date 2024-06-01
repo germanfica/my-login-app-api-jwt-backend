@@ -32,13 +32,13 @@ interface UserAlias {
 interface UserCreationAttributes extends Optional<UserAttributes, 'id'> { }
 
 class UserModel extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes, UserAlias {
-  public id!: number;
-  public email!: string;
-  public displayName!: string;
-  public password!: string;
-  public username!: string;
+  declare id: number; // this is ok! The 'declare' keyword ensures this field will not be emitted by TypeScript.
+  declare email: string;
+  declare displayName: string;
+  declare password: string;
+  declare username: string;
 
-  public roles!: RoleModel[];
+  declare roles: RoleModel[];
 
   // Métodos opcionales para las relaciones con roles
   // public getRoles!: () => Promise<RoleModel[]>;

@@ -4,8 +4,8 @@ import sequelize from '../config/database';
 import { ERole } from '../enums/role.enum';
 
 class RoleModel extends Model {
-  public id!: number;
-  public name!: string;
+  declare id: number; // this is ok! The 'declare' keyword ensures this field will not be emitted by TypeScript.
+  declare name: string;
 }
 
 RoleModel.init({
