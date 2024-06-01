@@ -58,8 +58,8 @@ UserModel.init({
 });
 
 // Define associations
-UserModel.belongsToMany(RoleModel, { through: 'privileges', foreignKey: 'userId' });
-RoleModel.belongsToMany(UserModel, { through: 'privileges', foreignKey: 'roleId' });
+UserModel.belongsToMany(RoleModel, { through: 'privileges', timestamps: false, foreignKey: 'userId' });
+RoleModel.belongsToMany(UserModel, { through: 'privileges', timestamps: false, foreignKey: 'roleId' });
 
 // NOTE: Avoid placing business logic directly in the model.
 // Business logic, such as password hashing, should be handled in the service.
