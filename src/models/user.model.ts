@@ -1,9 +1,53 @@
 // models/user.model.ts
-import { DataTypes, Model } from 'sequelize';
+import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 import RoleModel from './role.model';
+import { Role } from '../dtos/role.dto';
 
-class UserModel extends Model { }
+// Definir una interfaz para los atributos del modelo
+interface UserAttributes {
+  id: number;
+  email: string;
+  displayName: string;
+  password: string;
+  username: string;
+  // Definir una relación opcional con RoleModel
+}
+
+// User Associations with alias
+interface UserAlias {
+  roles?: RoleModel[]; // roles alias
+  // getRoles: () => Promise<RoleModel[]>;
+  // addRole: (role: RoleModel) => Promise<void>;
+  // addRoles: (roles: RoleModel[]) => Promise<void>;
+  // setRoles: (roles: RoleModel[]) => Promise<void>;
+  // removeRole: (role: RoleModel) => Promise<void>;
+  // removeRoles: (roles: RoleModel[]) => Promise<void>;
+  // hasRole: (role: RoleModel) => Promise<boolean>;
+  // hasRoles: (roles: RoleModel[]) => Promise<boolean>;
+  // countRoles: () => Promise<number>;
+}
+
+// Definir una interfaz para la creación de atributos
+interface UserCreationAttributes extends Optional<UserAttributes, 'id'> { }
+
+class UserModel extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes, UserAlias {
+  public id!: number;
+  public email!: string;
+  public displayName!: string;
+  public password!: string;
+  public username!: string;
+
+  public roles!: RoleModel[];
+
+  // Métodos opcionales para las relaciones con roles
+  // public getRoles!: () => Promise<RoleModel[]>;
+  // public addRole!: (role: RoleModel) => Promise<void>;
+  // public addRoles!: (roles: RoleModel[]) => Promise<void>;
+  // public setRoles!: (roles: RoleModel[]) => Promise<void>;
+  // public removeRole!: (role: RoleModel) => Promise<void>;
+  // public removeRoles!: (roles: RoleModel[]) => Promise<void>;
+}
 
 UserModel.init({
   id: {
@@ -58,8 +102,10 @@ UserModel.init({
 });
 
 // Define associations
-UserModel.belongsToMany(RoleModel, { through: 'privileges', timestamps: false, foreignKey: 'userId' });
-RoleModel.belongsToMany(UserModel, { through: 'privileges', timestamps: false, foreignKey: 'roleId' });
+// roles alias
+UserModel.belongsToMany(RoleModel, { through: 'privileges', timestamps: false, foreignKey: 'userId', as: 'roles' });
+// users alias
+RoleModel.belongsToMany(UserModel, { through: 'privileges', timestamps: false, foreignKey: 'roleId', as: 'users' });
 
 // NOTE: Avoid placing business logic directly in the model.
 // Business logic, such as password hashing, should be handled in the service.

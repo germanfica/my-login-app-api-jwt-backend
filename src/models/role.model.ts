@@ -3,7 +3,10 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 import { ERole } from '../enums/role.enum';
 
-class RoleModel extends Model { }
+class RoleModel extends Model {
+  public id!: number;
+  public name!: string;
+}
 
 RoleModel.init({
   id: {

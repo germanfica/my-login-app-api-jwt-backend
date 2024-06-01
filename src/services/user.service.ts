@@ -42,3 +42,30 @@ export const createUser = async (username: string, password: string, displayName
 
   return newUser.get() as User;
 };
+
+// CRUD
+// Get all users
+export const getAllUsers = async (): Promise<User[]> => {
+  const users = await UserModel.findAll();
+  return users.map(user => user.get() as User);
+};
+
+// Get user by ID
+export const getUser = async (id: number): Promise<User | null> => {
+  const user = await UserModel.findByPk(id);
+  return user ? user.get() as User : null;
+};
+
+// Delete user by ID
+export const deleteUser = async (id: number): Promise<boolean> => {
+  const deletedCount = await UserModel.destroy({ where: { id } });
+  return deletedCount > 0;
+};
+
+// Get first name by ID
+export const getFirstNameById = async (id: number): Promise<string | null> => {
+  const user = await UserModel.findByPk(id, {
+    attributes: ['displayName']
+  });
+  return user ? user['displayName'] : null;
+};
