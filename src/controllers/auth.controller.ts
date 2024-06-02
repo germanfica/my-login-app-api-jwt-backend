@@ -4,12 +4,19 @@ import jwt from 'jsonwebtoken';
 import config from '../config';
 import { createUser } from '../services/user.service';
 import { User } from '../dtos/user.dto';
+import { getUserRoles } from '../services/role.service';
 
 const jwtSecret = config.jwtSecret;
 
-export const login = (req: Request, res: Response): void => {
+export const login = async (req: Request, res: Response): Promise<void> => {
     const user = req.user as User;
-    const token = jwt.sign({ username: user.username }, jwtSecret);
+    const token = jwt.sign({
+        id: user.id,
+        email: user.email,
+        display_name: user.displayName,
+        username: user.username,
+        roles: await getUserRoles(user.id)
+    }, jwtSecret);
     res.json({ token });
 };
 
