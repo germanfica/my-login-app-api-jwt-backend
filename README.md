@@ -36,6 +36,16 @@ MyLoginApp is a Node.js-based application for user authentication using Passport
     npm start
     ```
 
+5. Insert roles into the database:
+    ```sql
+    USE myloginapp;
+
+    INSERT INTO role (id, name)
+    VALUES
+    (1, 'ROLE_ADMIN'),
+    (2, 'ROLE_USER');
+    ```
+
 ## Running the Application
 
 To run the application, use the following command:
