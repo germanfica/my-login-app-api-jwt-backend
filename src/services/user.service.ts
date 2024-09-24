@@ -4,7 +4,7 @@ import UserModel from '../models/user.model';
 import { User } from '../dtos/user.dto';
 
 // Define a type that includes only the attributes needed to create a new user
-//type UserCreationAttributes = Pick<User, 'username' | 'email' | 'password' | 'displayName'>;
+//type UserCreationAttributes = Pick<User, 'username' | 'email' | 'password' | 'display_name'>;
 type UserCreationAttributes = Omit<User, 'id'>;
 
 export const hashPassword = async (password: string): Promise<string> => {
@@ -32,10 +32,10 @@ export const createUser = async (username: string, password: string, displayName
   const hashedPassword = await hashPassword(password);
 
   const userData: UserCreationAttributes = {
-    username,
-    email,
+    username: username,
+    email: email,
     password: hashedPassword,
-    displayName,
+    display_name: displayName,
   };
 
   const newUser = await UserModel.create(userData);
@@ -65,7 +65,7 @@ export const deleteUser = async (id: number): Promise<boolean> => {
 // Get first name by ID
 export const getFirstNameById = async (id: number): Promise<string | null> => {
   const user = await UserModel.findByPk(id, {
-    attributes: ['displayName']
+    attributes: ['display_name']
   });
-  return user ? user['displayName'] : null;
+  return user ? user['display_name'] : null;
 };

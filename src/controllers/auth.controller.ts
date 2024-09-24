@@ -13,7 +13,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const token = jwt.sign({
         id: user.id,
         email: user.email,
-        display_name: user.displayName,
+        display_name: user.display_name,
         username: user.username,
         roles: await getUserRoles(user.id)
     }, jwtSecret);
@@ -22,12 +22,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 export const signup = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const { username, password, displayName, email } = req.body;
-        const newUser = await createUser(username, password, displayName, email);
+        const { username, password, display_name, email } = req.body;
+        const newUser = await createUser(username, password, display_name, email);
         return res.status(201).json({
             id: newUser.id,
             username: newUser.username,
-            displayName: newUser.displayName,
+            display_name: newUser.display_name,
             email: newUser.email,
             token: jwt.sign({ username: newUser.username }, jwtSecret)
         });

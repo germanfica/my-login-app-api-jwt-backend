@@ -8,7 +8,7 @@ import { Role } from '../dtos/role.dto';
 interface UserAttributes {
   id: number;
   email: string;
-  displayName: string;
+  display_name: string;
   password: string;
   username: string;
   // Definir una relación opcional con RoleModel
@@ -34,7 +34,7 @@ interface UserCreationAttributes extends Optional<UserAttributes, 'id'> { }
 class UserModel extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes, UserAlias {
   declare id: number; // this is ok! The 'declare' keyword ensures this field will not be emitted by TypeScript.
   declare email: string;
-  declare displayName: string;
+  declare display_name: string;
   declare password: string;
   declare username: string;
 
@@ -70,7 +70,7 @@ UserModel.init({
       }
     },
   },
-  displayName: {
+  display_name: {
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
