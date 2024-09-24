@@ -15,9 +15,11 @@ RoleModel.init({
     primaryKey: true,
   },
   name: {
-    type: DataTypes.ENUM,
-    values: Object.values(ERole),
+    type: DataTypes.STRING,
     allowNull: false,
+    validate: {
+      notEmpty: true,
+    }
   },
 }, {
   sequelize,
