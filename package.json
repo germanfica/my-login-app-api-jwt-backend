@@ -29,11 +29,11 @@
     "passport-http-bearer": "^1.0.1",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
-    "sequelize": "^6.37.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.4.4"
+    "sequelize": "^6.37.2"
   },
   "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.4",
     "@types/dotenv": "^8.2.0",
     "@types/node": "^20.12.5",
     "@types/passport-jwt": "^4.0.1",
