@@ -144,6 +144,17 @@ pipeline {
             }
         }
 
+        stage('Clean Up Local Image') {
+            agent { label 'my-pc' }
+            steps {
+                script {
+                    bat "docker rmi ${params.APP_IMAGE_NAME}:${APP_IMAGE_TAG} -f"
+                    bat "docker rmi ${params.APP_IMAGE_NAME}:${buildTag} -f"
+                    echo "Docker images ${params.APP_IMAGE_NAME}:${APP_IMAGE_TAG} and ${params.APP_IMAGE_NAME}:${buildTag} removed locally."
+                }
+            }
+        }
+
         stage('Load docker image to the server') {
             agent { label 'my-pc' }
             steps {
@@ -160,41 +171,115 @@ pipeline {
             }
         }
 
-        // stage('Modify docker-compose-image-template.yml') {
+        stage('Modify docker-compose-image-template.yml') {
+            agent { label 'my-pc' }
+            steps {
+                script {
+                    // Lee el contenido del archivo docker-compose-image-template.yml
+                    def dockerComposeTemplate = readFile 'docker-compose-image-template.yml'
+
+                    // Reemplaza 'tu-imagen-hash' con '${env.APP_IMAGE_NAME}:${buildTag}'
+                    def dockerComposeContent = dockerComposeTemplate
+                        .replaceAll('app-image-name', "${env.APP_IMAGE_NAME}:${buildTag}")
+                        .replaceAll('app-container-name', "${env.APP_IMAGE_NAME}")
+
+                    // Escribe el contenido modificado en un nuevo archivo
+                    def outputComposeFile = "${env.APP_IMAGE_NAME}-docker-compose.yml"
+                    writeFile file: outputComposeFile, text: dockerComposeContent
+
+                    echo "Content successfully modified:\n${dockerComposeContent}"
+                }
+            }
+        }
+
+        stage('Upload docker-compose.yml to the server') {
+            agent { label 'my-pc' }
+            steps {
+
+                withCredentials([
+                    // No te olvides de agregar estos IDs en tus credenciales de tipo Secret text
+                    string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'), // Secret text: puerto de tu servidor SSH
+                    string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'), // Secret text: usuario de tu servidor SSH
+                    string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST') // Secret text: IP de tu servidor SSH
+                ]) {
+                    bat """
+                        scp -P %SSH_PORT% ${env.APP_IMAGE_NAME}-docker-compose.yml %SSH_USERNAME%@%SSH_HOST%:~/${env.APP_IMAGE_NAME}-docker-compose.yml
+                    """
+                }
+            }
+        }
+
+        // stage('Export environment variables on Server') {
         //     agent { label 'my-pc' }
         //     steps {
-        //         script {
-        //             // Lee el contenido del archivo docker-compose-image-template.yml
-        //             def dockerComposeTemplate = readFile 'docker-compose-image-template.yml'
+        //         withCredentials([file(credentialsId: 'my-login-app-api.env', variable: 'SECRET_ENV_FILE')]) {
+        //             script {
+        //                 // Lee el archivo .env y convierte cada línea en una variable
+        //                 def envVars = readFile(SECRET_ENV_FILE).split('\n')
 
-        //             // Reemplaza 'tu-imagen-hash' con '${env.APP_IMAGE_NAME}:${buildTag}'
-        //             def dockerComposeContent = dockerComposeTemplate.replaceAll('app-image-name', "${env.APP_IMAGE_NAME}:${buildTag}")
+        //                 // Construye el comando export para cada variable en el servidor
+        //                 def exportCommands = envVars.collect { line ->
+        //                     if (line.trim()) {
+        //                         return "export ${line.trim()}"
+        //                     }
+        //                 }.join(' && ')
 
-        //             // Escribe el contenido modificado en un nuevo archivo
-        //             def outputComposeFile = "${env.APP_IMAGE_NAME}-docker-compose.yml"
-        //             writeFile file: outputComposeFile, text: dockerComposeContent
-
-        //             echo "Content successfully modified:\n${dockerComposeContent}"
+        //                 // Ejecuta el comando en el servidor
+        //                 withCredentials([
+        //                     string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'),
+        //                     string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'),
+        //                     string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
+        //                 ]) {
+        //                     bat """
+        //                         ssh -o StrictHostKeyChecking=no -p %SSH_PORT% %SSH_USERNAME%@%SSH_HOST% "${exportCommands} && echo 'Environment variables set successfully.'"
+        //                     """
+        //                 }
+        //             }
         //         }
         //     }
         // }
 
-        // stage('Upload docker-compose.yml to the server') {
+        // stage('Export environment variable on Server') {
         //     agent { label 'my-pc' }
         //     steps {
-
         //         withCredentials([
-        //             // No te olvides de agregar estos IDs en tus credenciales de tipo Secret text
-        //             string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'), // Secret text: puerto de tu servidor SSH
-        //             string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'), // Secret text: usuario de tu servidor SSH
-        //             string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST') // Secret text: IP de tu servidor SSH
+        //             string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'),
+        //             string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'),
+        //             string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
         //         ]) {
-        //             bat """
-        //                 scp -P %SSH_PORT% docker-compose-image-template.yml %SSH_USERNAME%@%SSH_HOST%:~/${env.APP_IMAGE_NAME}-docker-compose.yml
-        //             """
+        //             script {
+        //                 // Define el comando para exportar una sola variable
+        //                 def exportCommand = "export DB_NAME=myloginapp"
+
+        //                 // Ejecuta el comando en el servidor
+        //                 bat """
+        //                     ssh -o StrictHostKeyChecking=no -p %SSH_PORT% %SSH_USERNAME%@%SSH_HOST% "${exportCommand} && echo 'DB_NAME set successfully.'"
+        //                 """
+        //             }
         //         }
         //     }
         // }
+
+        stage('Export environment variable on Server') {
+            agent { label 'my-pc' }
+            steps {
+                withCredentials([
+                    string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'),
+                    string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'),
+                    string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
+                ]) {
+                    script {
+                        // Define el comando export y docker-compose en una línea
+                        def exportCommand = "export DB_NAME=myloginapp && docker-compose -f ${env.APP_IMAGE_NAME}-docker-compose.yml up -d"
+
+                        // Ejecuta el comando en el servidor sin comillas exteriores
+                        bat """
+                            ssh -o StrictHostKeyChecking=no -p %SSH_PORT% %SSH_USERNAME%@%SSH_HOST% ${exportCommand} && echo DB_NAME set successfully.
+                        """
+                    }
+                }
+            }
+        }
 
     }
 }
