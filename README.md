@@ -66,13 +66,30 @@ The server will start on port 3000. You can access it at `http://localhost:3000`
 
 This project requires an `.env` file to configure environment-specific settings. Below is an example of the required variables:
 
+For local
+
 ```plaintext
+MYSQL_ROOT_PASSWORD=rootpassword
 JWT_SECRET=your_jwt_secret
 DB_HOST=localhost
 DB_PORT=3306
 DB_USERNAME=user
 DB_PASSWORD=password
 DB_NAME=myloginapp
+NODE_ENV=production
+```
+
+For production
+
+```plaintext
+MYSQL_ROOT_PASSWORD=rootpassword
+JWT_SECRET=your_jwt_secret
+DB_HOST=db
+DB_PORT=3306
+DB_USERNAME=user
+DB_PASSWORD=password
+DB_NAME=myloginapp
+NODE_ENV=production
 ```
 
 ## Docker
