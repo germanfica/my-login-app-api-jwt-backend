@@ -270,7 +270,7 @@ pipeline {
                 ]) {
                     script {
                         // Define el comando export y docker-compose en una línea
-                        def exportCommand = "export DB_NAME=myloginapp && docker-compose -f ${env.APP_IMAGE_NAME}-docker-compose.yml up -d"
+                        def exportCommand = "export DB_NAME=myloginapp && docker-compose -p ${env.APP_IMAGE_NAME} -f ${env.APP_IMAGE_NAME}-docker-compose.yml up -d"
 
                         // Ejecuta el comando en el servidor sin comillas exteriores
                         bat """
