@@ -218,19 +218,16 @@ pipeline {
                         string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
                     ]) {
                     script {
-                        def sshPort = env.SSH_PORT
-                        def sshUsername = env.SSH_USERNAME
-                        def sshHost = env.SSH_HOST
-
                         // No queda otra que usar .env.production para producción...
                         // Copy .env file to the server as .env.prod
                         powershell """
-                            scp -P ${sshPort} ${ENV_FILE} ${sshUsername}@${sshHost}:/root/.env.prod
+                            scp -P ${env.SSH_PORT} ${ENV_FILE} ${env.SSH_USERNAME}@${env.SSH_HOST}:/root/.env.prod
                         """
 
                         // Run docker-compose with the --env-file option
                         powershell """
-                            ssh -o StrictHostKeyChecking=no -p ${sshPort} ${sshUsername}@${sshHost} '
+                            ssh -o StrictHostKeyChecking=no -p ${env.SSH_PORT} ${env.SSH_USERNAME}@${env.SSH_HOST} '
+                                docker container prune
                                 docker-compose -p ${env.APP_IMAGE_NAME} -f ${env.APP_IMAGE_NAME}-docker-compose.yml --env-file .env.prod up -d
                             '
                         """
@@ -247,13 +244,9 @@ pipeline {
                         string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
                     ]) {
                     script {
-                        def sshPort = env.SSH_PORT
-                        def sshUsername = env.SSH_USERNAME
-                        def sshHost = env.SSH_HOST
-
                         // Delete .env.prod from the server
                         powershell """
-                            ssh -o StrictHostKeyChecking=no -p ${sshPort} ${sshUsername}@${sshHost} '
+                            ssh -o StrictHostKeyChecking=no -p ${env.SSH_PORT} ${env.SSH_USERNAME}@${env.SSH_HOST} '
                                 rm -f /root/.env.prod
                             '
                         """
