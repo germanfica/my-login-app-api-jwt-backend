@@ -209,73 +209,53 @@ pipeline {
             }
         }
 
-        // stage('Export environment variables on Server') {
-        //     agent { label 'my-pc' }
-        //     steps {
-        //         withCredentials([file(credentialsId: 'my-login-app-api.env', variable: 'SECRET_ENV_FILE')]) {
-        //             script {
-        //                 // Lee el archivo .env y convierte cada línea en una variable
-        //                 def envVars = readFile(SECRET_ENV_FILE).split('\n')
-
-        //                 // Construye el comando export para cada variable en el servidor
-        //                 def exportCommands = envVars.collect { line ->
-        //                     if (line.trim()) {
-        //                         return "export ${line.trim()}"
-        //                     }
-        //                 }.join(' && ')
-
-        //                 // Ejecuta el comando en el servidor
-        //                 withCredentials([
-        //                     string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'),
-        //                     string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'),
-        //                     string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
-        //                 ]) {
-        //                     bat """
-        //                         ssh -o StrictHostKeyChecking=no -p %SSH_PORT% %SSH_USERNAME%@%SSH_HOST% "${exportCommands} && echo 'Environment variables set successfully.'"
-        //                     """
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-
-        // stage('Export environment variable on Server') {
-        //     agent { label 'my-pc' }
-        //     steps {
-        //         withCredentials([
-        //             string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'),
-        //             string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'),
-        //             string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
-        //         ]) {
-        //             script {
-        //                 // Define el comando para exportar una sola variable
-        //                 def exportCommand = "export DB_NAME=myloginapp"
-
-        //                 // Ejecuta el comando en el servidor
-        //                 bat """
-        //                     ssh -o StrictHostKeyChecking=no -p %SSH_PORT% %SSH_USERNAME%@%SSH_HOST% "${exportCommand} && echo 'DB_NAME set successfully.'"
-        //                 """
-        //             }
-        //         }
-        //     }
-        // }
-
-        // Se está intentando ejecutar docker-compose sin necesidad de usar .env file
-        stage('Export environment variable on Server (Experimental)') {
-            agent { label 'my-pc' }
+        stage('Export environment variable on Server') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'),
-                    string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'),
-                    string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
-                ]) {
+                        file(credentialsId: 'my-login-app-api.env', variable: 'ENV_FILE'),
+                        string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'),
+                        string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'),
+                        string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
+                    ]) {
                     script {
-                        // Define el comando export y docker-compose en una línea
-                        def exportCommand = "export DB_NAME=myloginapp && docker-compose -p ${env.APP_IMAGE_NAME} -f ${env.APP_IMAGE_NAME}-docker-compose.yml up -d"
+                        def sshPort = env.SSH_PORT
+                        def sshUsername = env.SSH_USERNAME
+                        def sshHost = env.SSH_HOST
 
-                        // Ejecuta el comando en el servidor sin comillas exteriores
-                        bat """
-                            ssh -o StrictHostKeyChecking=no -p %SSH_PORT% %SSH_USERNAME%@%SSH_HOST% ${exportCommand} && echo DB_NAME set successfully.
+                        // No queda otra que usar .env.production para producción...
+                        // Copy .env file to the server as .env.prod
+                        powershell """
+                            scp -P ${sshPort} ${ENV_FILE} ${sshUsername}@${sshHost}:/root/.env.prod
+                        """
+
+                        // Run docker-compose with the --env-file option
+                        powershell """
+                            ssh -o StrictHostKeyChecking=no -p ${sshPort} ${sshUsername}@${sshHost} '
+                                docker-compose -p ${env.APP_IMAGE_NAME} -f ${env.APP_IMAGE_NAME}-docker-compose.yml --env-file .env.prod up -d
+                            '
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Delete .env.prod from server') {
+            steps {
+                withCredentials([
+                        string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'),
+                        string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'),
+                        string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
+                    ]) {
+                    script {
+                        def sshPort = env.SSH_PORT
+                        def sshUsername = env.SSH_USERNAME
+                        def sshHost = env.SSH_HOST
+
+                        // Delete .env.prod from the server
+                        powershell """
+                            ssh -o StrictHostKeyChecking=no -p ${sshPort} ${sshUsername}@${sshHost} '
+                                rm -f /root/.env.prod
+                            '
                         """
                     }
                 }
