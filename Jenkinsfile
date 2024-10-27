@@ -144,6 +144,17 @@ pipeline {
             }
         }
 
+        stage('Clean Up Local Image') {
+            agent { label 'my-pc' }
+            steps {
+                script {
+                    bat "docker rmi ${params.APP_IMAGE_NAME}:${APP_IMAGE_TAG} -f"
+                    bat "docker rmi ${params.APP_IMAGE_NAME}:${buildTag} -f"
+                    echo "Docker images ${params.APP_IMAGE_NAME}:${APP_IMAGE_TAG} and ${params.APP_IMAGE_NAME}:${buildTag} removed locally."
+                }
+            }
+        }
+
         stage('Load docker image to the server') {
             agent { label 'my-pc' }
             steps {
@@ -160,41 +171,89 @@ pipeline {
             }
         }
 
-        // stage('Modify docker-compose-image-template.yml') {
-        //     agent { label 'my-pc' }
-        //     steps {
-        //         script {
-        //             // Lee el contenido del archivo docker-compose-image-template.yml
-        //             def dockerComposeTemplate = readFile 'docker-compose-image-template.yml'
+        stage('Modify docker-compose-image-template.yml') {
+            agent { label 'my-pc' }
+            steps {
+                script {
+                    // Lee el contenido del archivo docker-compose-image-template.yml
+                    def dockerComposeTemplate = readFile 'docker-compose-image-template.yml'
 
-        //             // Reemplaza 'tu-imagen-hash' con '${env.APP_IMAGE_NAME}:${buildTag}'
-        //             def dockerComposeContent = dockerComposeTemplate.replaceAll('app-image-name', "${env.APP_IMAGE_NAME}:${buildTag}")
+                    // Reemplaza 'tu-imagen-hash' con '${env.APP_IMAGE_NAME}:${buildTag}'
+                    def dockerComposeContent = dockerComposeTemplate
+                        .replaceAll('app-image-name', "${env.APP_IMAGE_NAME}:${buildTag}")
+                        .replaceAll('app-container-name', "${env.APP_IMAGE_NAME}")
 
-        //             // Escribe el contenido modificado en un nuevo archivo
-        //             def outputComposeFile = "${env.APP_IMAGE_NAME}-docker-compose.yml"
-        //             writeFile file: outputComposeFile, text: dockerComposeContent
+                    // Escribe el contenido modificado en un nuevo archivo
+                    def outputComposeFile = "${env.APP_IMAGE_NAME}-docker-compose.yml"
+                    writeFile file: outputComposeFile, text: dockerComposeContent
 
-        //             echo "Content successfully modified:\n${dockerComposeContent}"
-        //         }
-        //     }
-        // }
+                    echo "Content successfully modified:\n${dockerComposeContent}"
+                }
+            }
+        }
 
-        // stage('Upload docker-compose.yml to the server') {
-        //     agent { label 'my-pc' }
-        //     steps {
+        stage('Upload docker-compose.yml to the server') {
+            agent { label 'my-pc' }
+            steps {
 
-        //         withCredentials([
-        //             // No te olvides de agregar estos IDs en tus credenciales de tipo Secret text
-        //             string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'), // Secret text: puerto de tu servidor SSH
-        //             string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'), // Secret text: usuario de tu servidor SSH
-        //             string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST') // Secret text: IP de tu servidor SSH
-        //         ]) {
-        //             bat """
-        //                 scp -P %SSH_PORT% docker-compose-image-template.yml %SSH_USERNAME%@%SSH_HOST%:~/${env.APP_IMAGE_NAME}-docker-compose.yml
-        //             """
-        //         }
-        //     }
-        // }
+                withCredentials([
+                    // No te olvides de agregar estos IDs en tus credenciales de tipo Secret text
+                    string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'), // Secret text: puerto de tu servidor SSH
+                    string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'), // Secret text: usuario de tu servidor SSH
+                    string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST') // Secret text: IP de tu servidor SSH
+                ]) {
+                    bat """
+                        scp -P %SSH_PORT% ${env.APP_IMAGE_NAME}-docker-compose.yml %SSH_USERNAME%@%SSH_HOST%:~/${env.APP_IMAGE_NAME}-docker-compose.yml
+                    """
+                }
+            }
+        }
+
+        stage('Export environment variable on Server') {
+            steps {
+                withCredentials([
+                        file(credentialsId: 'my-login-app-api.env', variable: 'ENV_FILE'),
+                        string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'),
+                        string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'),
+                        string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
+                    ]) {
+                    script {
+                        // No queda otra que usar .env.production para producción...
+                        // Copy .env file to the server as .env.prod
+                        powershell """
+                            scp -P ${env.SSH_PORT} ${ENV_FILE} ${env.SSH_USERNAME}@${env.SSH_HOST}:/root/.env.prod
+                        """
+
+                        // Run docker-compose with the --env-file option
+                        powershell """
+                            ssh -o StrictHostKeyChecking=no -p ${env.SSH_PORT} ${env.SSH_USERNAME}@${env.SSH_HOST} '
+                                docker container prune
+                                docker-compose -p ${env.APP_IMAGE_NAME} -f ${env.APP_IMAGE_NAME}-docker-compose.yml --env-file .env.prod up -d
+                            '
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Delete .env.prod from server') {
+            steps {
+                withCredentials([
+                        string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'),
+                        string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'),
+                        string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
+                    ]) {
+                    script {
+                        // Delete .env.prod from the server
+                        powershell """
+                            ssh -o StrictHostKeyChecking=no -p ${env.SSH_PORT} ${env.SSH_USERNAME}@${env.SSH_HOST} '
+                                rm -f /root/.env.prod
+                            '
+                        """
+                    }
+                }
+            }
+        }
 
     }
 }
