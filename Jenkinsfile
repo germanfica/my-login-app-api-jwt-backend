@@ -209,6 +209,39 @@ pipeline {
             }
         }
 
+        stage('Stop running containers') {
+            steps {
+                withCredentials([
+                        string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'),
+                        string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'),
+                        string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
+                    ]) {
+                    script {
+                        bat """
+                            ssh -o StrictHostKeyChecking=no -p %SSH_PORT% %SSH_USERNAME%@%SSH_HOST% ^
+                            "docker ps --filter 'name=${params.APP_IMAGE_NAME}' --format '{{.ID}}' | xargs -r docker stop"
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Prune containers on Server') {
+            steps {
+                withCredentials([
+                        string(credentialsId: 'SSH_PORT', variable: 'SSH_PORT'),
+                        string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USERNAME'),
+                        string(credentialsId: 'SSH_HOST', variable: 'SSH_HOST')
+                    ]) {
+                    script {
+                        bat """
+                            ssh -o StrictHostKeyChecking=no -p %SSH_PORT% %SSH_USERNAME%@%SSH_HOST% "docker container prune -f"
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Export environment variable on Server') {
             steps {
                 withCredentials([
@@ -227,7 +260,6 @@ pipeline {
                         // Run docker-compose with the --env-file option
                         powershell """
                             ssh -o StrictHostKeyChecking=no -p ${env.SSH_PORT} ${env.SSH_USERNAME}@${env.SSH_HOST} '
-                                docker container prune
                                 docker-compose -p ${env.APP_IMAGE_NAME} -f ${env.APP_IMAGE_NAME}-docker-compose.yml --env-file .env.prod up -d
                             '
                         """
