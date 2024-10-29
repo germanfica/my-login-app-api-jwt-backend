@@ -12,10 +12,11 @@ services:
     volumes:
       - db-data:/var/lib/mysql
 
-  app:
+  app_api_v1:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: app_api_v1
     environment:
       NODE_ENV: ${NODE_ENV}
       JWT_SECRET: ${JWT_SECRET}
