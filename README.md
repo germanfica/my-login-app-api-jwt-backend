@@ -76,7 +76,6 @@ DB_PORT=3306
 DB_USERNAME=user
 DB_PASSWORD=password
 DB_NAME=myloginapp
-NODE_ENV=production
 ```
 
 For production
@@ -89,7 +88,6 @@ DB_PORT=3306
 DB_USERNAME=user
 DB_PASSWORD=password
 DB_NAME=myloginapp
-NODE_ENV=production
 ```
 
 ## Docker

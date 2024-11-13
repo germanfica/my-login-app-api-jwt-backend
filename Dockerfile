@@ -27,9 +27,6 @@ RUN npm install --only=production
 # Copy the compiled code from the previous phase
 COPY --from=builder /app/dist ./dist
 
-# Set the environment variable for production
-ENV NODE_ENV=production
-
 # Expose the port on which the application runs
 EXPOSE 3000
 
